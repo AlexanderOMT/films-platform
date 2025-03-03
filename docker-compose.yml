@@ -1,0 +1,43 @@
+
+
+networks:
+  films-platform-network:
+
+volumes:
+  psql-films-volume:
+
+services:
+  postgres-database:
+    image: postgres:latest
+    container_name: films-database
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - psql-films-volume:/var/lib/postgresql/data
+    networks:
+      - films-platform-network
+
+  films-api:
+    container_name: films-service
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    restart: on-failure
+    ports:
+      - "8000:8000"
+    depends_on:
+      - "postgres-database"
+    networks:
+      - films-platform-network
+    environment:
+      - DB_HOST=postgres-database
+      - DB_PORT=5432
+      - DB_SSLMODE=disable
+    env_file:
+      - .env
+

@@ -1,0 +1,15 @@
+
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY, 
+    username VARCHAR (100) NOT NULL, 
+    password VARCHAR(150) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS films (
+    id SERIAL PRIMARY KEY, 
+    user_id INT NOT NULL, 
+    title VARCHAR (100) UNIQUE NOT NULL, 
+    director VARCHAR(100), 
+    release TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
