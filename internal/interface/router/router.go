@@ -16,8 +16,8 @@ type Server struct {
 	*http.Server
 }
 
-func NewServerAtAddr(addr string, userService usecase.UserService) *Server {
-	RegisterRoutes(userService)
+func NewServerAtAddr(addr string, userService usecase.UserService, authService usecase.AuthService) *Server {
+	RegisterRoutes(userService, authService)
 	server := &http.Server{
 		Addr: addr,
 	}
