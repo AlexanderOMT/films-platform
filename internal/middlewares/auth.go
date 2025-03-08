@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"context"
+	"log"
 	"net/http"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -22,10 +23,12 @@ func AuthenticateTokenUser(nextHandlerFunc http.HandlerFunc) http.HandlerFunc {
 			return secretKey, nil
 		})
 		if !tokenParsed.Valid {
+			log.Println("Error validating the jwt in the middleware: Token is invalid")
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
 		if err != nil {
+			log.Printf("Error validating the jwt in the middleware: %b", err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}

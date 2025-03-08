@@ -141,11 +141,10 @@ func (f *FilmHandler) PatchFilm(w http.ResponseWriter, r *http.Request) {
 // If there is not all the fields of the film given, then will return a error response
 // The service called has the responsability if the subject user id is allowed (or not allowed) for updating the given film
 // Its response is the film updated or any error if encountred
-
 func (f *FilmHandler) PutFilm(w http.ResponseWriter, r *http.Request) {
 	subjectID, ok := r.Context().Value("subjectId").(int)
 	if !ok || subjectID == 0 {
-		log.Println("Eror updating (PUT) the film: No subject ID found in context")
+		log.Println("Error updating (PUT) the film: No subject ID found in context")
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
