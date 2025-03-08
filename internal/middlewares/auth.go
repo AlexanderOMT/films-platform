@@ -1,7 +1,7 @@
 package middlewares
 
 import (
-	"log"
+	"context"
 	"net/http"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -10,11 +10,11 @@ import (
 var secretKey = []byte("secret-key")
 
 func AuthenticateTokenUser(nextHandlerFunc http.HandlerFunc) http.HandlerFunc {
-	log.Printf("middleware:")
+	// FIXME: style: status should be related to the actual error
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Parse request body and decode json
-		tokenToVerify := r.Header.Get("Authorization")
-		tokenVerified, err := jwt.Parse(tokenToVerify, func(tokenString *jwt.Token) (interface{}, error) {
+		tokenString := r.Header.Get("Authorization")
+		tokenVerified, err := jwt.Parse(tokenString, func(tokenString *jwt.Token) (interface{}, error) {
 			return secretKey, nil
 		})
 		if !tokenVerified.Valid {
@@ -22,10 +22,19 @@ func AuthenticateTokenUser(nextHandlerFunc http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest) // FIXME: style: status should be related to incorrect credentials ? bad request format?
+			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		nextHandlerFunc(w, r)
+
+		claims, ok := tokenVerified.Claims.(jwt.MapClaims)
+		if !ok {
+			http.Error(w, "Invalid token claims", http.StatusUnauthorized)
+		}
+		subjectId := int(claims["Subject"].(float64))
+
+		// Create a context with the  user id for the handlers can make queries easier without parsing the token each time to DB
+		ctx := context.WithValue(r.Context(), "subjectId", subjectId)
+		nextHandlerFunc.ServeHTTP(w, r.WithContext(ctx))
 	}
 
 }

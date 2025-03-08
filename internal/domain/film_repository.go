@@ -1,9 +1,12 @@
 package domain
 
-type filmRepository interface {
-	CreateFilm(film Film) error
-	UpdateFilm(title string) error
-	DeleteFilm(title string) error
-	GetFilm(title string) error
-	GetFilms(title string) error
+type FilmRepository interface {
+	CreateFilm(film *Film) error
+	PatchFilm(filmTitleToUpdate string, newFilmFields *map[string]interface{}) (*Film, error)
+	PutFilm(film *Film) (*Film, error)
+	DeleteFilm(title string) (*Film, error)
+
+	GetFilmByTitle(title string) error
+	GetAllFilms(optionalFilter *FilmFilter) ([]Film, error)
+	GetCreatorIdByTitle(title string) (int, error)
 }

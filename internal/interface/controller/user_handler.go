@@ -2,8 +2,10 @@ package controller
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
+	"golang-api-film-management/internal/domain"
 	"golang-api-film-management/internal/usecase"
 )
 
@@ -13,6 +15,15 @@ type UserHandler struct {
 
 func NewUserHandler(userService usecase.UserService) *UserHandler {
 	return &UserHandler{userService: userService}
+}
+
+func (userHandler *UserHandler) GetUserById(userId int) (*domain.User, error) {
+	foundUser, err := userHandler.userService.GetUserById(userId)
+	if err != nil {
+		log.Printf("Error extracting the user from the JWT: %v", userId)
+		return nil, err
+	}
+	return foundUser, nil
 }
 
 func (userHandler *UserHandler) GetUsers(w http.ResponseWriter, r *http.Request) {

@@ -27,14 +27,16 @@ func main() {
 
 	// Get the Database implementation
 	userRepo := infrastructure.NewUserRepo(dbConnection)
-	// Get the service implementation for the DB implementation
+	filmRepo := infrastructure.NewFilmRepo(dbConnection)
+	// Get the services implementation for the DB implementation
 	userService := usecase.NewUserService(userRepo)
 	authService := usecase.NewAuthService(userService)
+	filmService := usecase.NewFilmService(filmRepo)
 
-	// Create a HTTP server
+	// Create a HTTP server with the services
 	// TODO: addressToListen should be read from env or docker port
 	addressToListen := "0.0.0.0:8000"
-	httpServer := router.NewServerAtAddr(addressToListen, userService, authService)
+	httpServer := router.NewServerAtAddr(addressToListen, userService, authService, filmService)
 
 	// Channel for stop signal
 	httpServer.Start()

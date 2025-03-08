@@ -11,7 +11,7 @@ import (
 type AuthService interface {
 	RegisterUser(user domain.User) (*domain.User, error)
 	LoginUser(user domain.User) (*string, error)
-	getUserByToken(authenticatedToken *jwt.Token) (*domain.User, error)
+	GetUserByToken(authenticatedToken *jwt.Token) (*domain.User, error)
 
 	generateNewToken(user domain.User) (*string, error)
 	authenticateToken(tokenToVerify string) (*jwt.Token, error)
@@ -54,7 +54,8 @@ func (a *AuthServiceImpl) LoginUser(user domain.User) (*string, error) {
 }
 
 // Find out the user to DB and authenticate the user token
-func (a *AuthServiceImpl) getUserByToken(authenticatedToken *jwt.Token) (*domain.User, error) {
+// TODO: This is not used anymore, and it is implemented something of this in middleware because is more centralized. So remove this func when refactor user features
+func (a *AuthServiceImpl) GetUserByToken(authenticatedToken *jwt.Token) (*domain.User, error) {
 	claims := authenticatedToken.Claims.(jwt.MapClaims)
 
 	subjectId := int(claims["Subject"].(float64))
