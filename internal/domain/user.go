@@ -1,9 +1,7 @@
 package domain
 
-// TODO: engh: gorm tags ??
-
 type User struct {
+	Id       uint `gorm:"primaryKey"`
 	Username string
 	Password string
-	Id       int
 }

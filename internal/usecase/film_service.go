@@ -19,10 +19,14 @@ type FilmServiceImpl struct {
 	filmRepo domain.FilmRepository
 }
 
+// NewFilmService creates a new instance of FilmService with the provided FilmRepository.
 func NewFilmService(filmRepo domain.FilmRepository) FilmService {
 	return &FilmServiceImpl{filmRepo: filmRepo}
 }
 
+// CreateFilm creates a new film record in the repository.
+// It takes a pointer to a domain.Film object as input and returns an error if the creation fails.
+// If the film is successfully created, it returns nil.
 func (f *FilmServiceImpl) CreateFilm(film *domain.Film) error {
 	err := f.filmRepo.CreateFilm(film)
 	if err != nil {
@@ -30,6 +34,9 @@ func (f *FilmServiceImpl) CreateFilm(film *domain.Film) error {
 	}
 	return nil
 }
+
+// GetAllFilms retrieves all films from the repository, optionally filtered by the provided FilmFilter.
+// If an error occurs during retrieval, it returns an error.
 func (f *FilmServiceImpl) GetAllFilms(optionalFilter *domain.FilmFilter) ([]domain.Film, error) {
 	films, err := f.filmRepo.GetAllFilms(optionalFilter)
 	if err != nil {
@@ -38,6 +45,8 @@ func (f *FilmServiceImpl) GetAllFilms(optionalFilter *domain.FilmFilter) ([]doma
 	return films, nil
 }
 
+// DeleteFilm deletes a film with the given title if the user with the specified userId is the owner of the film.
+// It returns the deleted film and an error if any occurred during the process.
 func (f *FilmServiceImpl) DeleteFilm(title string, userId int) (*domain.Film, error) {
 	if err := f.validateFilmOwnershipForUserId(title, userId); err != nil {
 		return nil, fmt.Errorf("user %d is not owner for the film %v", userId, title)
@@ -49,6 +58,11 @@ func (f *FilmServiceImpl) DeleteFilm(title string, userId int) (*domain.Film, er
 	}
 	return film, nil
 }
+
+// PatchFilm updates the fields of a film identified by its title. The fields provided by the map can contains all or some of the film fields
+// It first validates if the user with the given userId is the owner of the film.
+// If the user is not the owner, it returns an error.
+// If the user is the owner, it proceeds to update the film with the provided fields.
 func (f *FilmServiceImpl) PatchFilm(filmTitle string, filmFields *map[string]interface{}, userId int) (*domain.Film, error) {
 	if err := f.validateFilmOwnershipForUserId(filmTitle, userId); err != nil {
 		return nil, fmt.Errorf("user %d is not owner for the film %v", userId, filmTitle)
@@ -61,6 +75,10 @@ func (f *FilmServiceImpl) PatchFilm(filmTitle string, filmFields *map[string]int
 
 	return film, nil
 }
+
+// PutFilm updates the film row if the user is the owner.
+// It validates the film ownership and updates the film in the repository. For those missing fields, default values will be filled
+// Returns the updated film or an error if the update fails.
 func (f *FilmServiceImpl) PutFilm(filmTitle string, film *domain.Film, userId int) (*domain.Film, error) {
 	if err := f.validateFilmOwnershipForUserId(filmTitle, userId); err != nil {
 		return nil, fmt.Errorf("user %d is not owner for the film %v", userId, filmTitle)
@@ -77,6 +95,9 @@ func (f *FilmServiceImpl) PutFilm(filmTitle string, film *domain.Film, userId in
 	return updatedFilm, nil
 }
 
+// validateFilmOwnershipForUserId checks if the given userId is the owner of the film with the specified filmTitle.
+// It retrieves the creator user ID from the film repository and compares it with the provided userId.
+// If the userId does not match the creator user ID, an error is returned indicating that the user is not the owner of the film.
 func (f *FilmServiceImpl) validateFilmOwnershipForUserId(filmTitle string, userId int) error {
 	creatorUserId, err := f.filmRepo.GetCreatorIdByTitle(filmTitle)
 	if err != nil {

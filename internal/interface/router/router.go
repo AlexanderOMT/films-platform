@@ -25,18 +25,19 @@ func NewServerAtAddr(addr string, userService usecase.UserService, authService u
 	return &Server{server}
 }
 
+// Start starts the server creating a go routine which will listen and server the connections, and set a gracefully shutdown which listen for shutdown signal from the system
 func (server *Server) Start() {
-	// Start the server and listen for incoming connections
 	log.Printf("Server is listening at address: %v", server.Addr)
-
 	go func() {
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("Server could not start: %v", err)
 		}
 	}()
+
 	server.gracefullyShutdown()
 }
 
+// gracefullyShutdown creates a channel to listen for shutdown signal (Interrupt, SIGTERM, SIGINT, SIGQUIT). When receied the signal, this func will create a context with timeout to shutdown the opened connections (e.g: database connection) and shutdown the server gracefully
 func (server *Server) gracefullyShutdown() {
 	// Create channel to listen for shutdown signal from OS or docker signal (note: see why is not working for 'ctl + cancel' in docker compose up)
 	stopGracefulChannel := make(chan os.Signal, 1)

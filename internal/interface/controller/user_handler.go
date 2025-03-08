@@ -2,10 +2,8 @@ package controller
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 
-	"golang-api-film-management/internal/domain"
 	"golang-api-film-management/internal/usecase"
 )
 
@@ -17,15 +15,8 @@ func NewUserHandler(userService usecase.UserService) *UserHandler {
 	return &UserHandler{userService: userService}
 }
 
-func (userHandler *UserHandler) GetUserById(userId int) (*domain.User, error) {
-	foundUser, err := userHandler.userService.GetUserById(userId)
-	if err != nil {
-		log.Printf("Error extracting the user from the JWT: %v", userId)
-		return nil, err
-	}
-	return foundUser, nil
-}
-
+// GetUsers retrieves a list of all users.
+// It calls the user service to fetch all users and returns the user list or an error.
 func (userHandler *UserHandler) GetUsers(w http.ResponseWriter, r *http.Request) {
 	users, err := userHandler.userService.GetAllUsers()
 	if err != nil {

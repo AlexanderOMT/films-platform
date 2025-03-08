@@ -29,6 +29,9 @@ func NewFilmHandler(filmService usecase.FilmService) *FilmHandler {
 
 // #TODO: enhance: implements input validations
 
+// CreateFilm creates a new film in the system and make the relationship with their creator
+// The relationship of the film with their creator is the subjecy user id extracted from the request context
+// Its response is the film created or any error if encountred
 func (f *FilmHandler) CreateFilm(w http.ResponseWriter, r *http.Request) {
 	subjectID, ok := extractSubjectIdFromContext(r)
 	if !ok || subjectID == 0 {
@@ -53,6 +56,10 @@ func (f *FilmHandler) CreateFilm(w http.ResponseWriter, r *http.Request) {
 	writeJSONResponse(w, http.StatusOK, filmToCreate)
 }
 
+// GetAllFilms retrieves all films based on a custom filter from query parameters.
+// It maps the query parameters with a `FilmFilter` struct
+// Calls a service so delegates the responsability of applying the filter for retrieving the list of film
+// Its response is the list of all the films with a opctional filter applied or any error if encountred
 func (f *FilmHandler) GetAllFilms(w http.ResponseWriter, r *http.Request) {
 	var customFilter domain.FilmFilter
 	if err := schema.NewDecoder().Decode(&customFilter, r.URL.Query()); err != nil {
@@ -69,6 +76,9 @@ func (f *FilmHandler) GetAllFilms(w http.ResponseWriter, r *http.Request) {
 	writeJSONResponse(w, http.StatusOK, films)
 }
 
+// DeleteFilm deletes a film based on the provided title.
+// Calls a service so delegates the responsability if the subject user id is allowed (or not allowed) for deleting the given film
+// Its response is the film removed or any error if encountred
 func (f *FilmHandler) DeleteFilm(w http.ResponseWriter, r *http.Request) {
 	subjectID, ok := extractSubjectIdFromContext(r)
 	if !ok || subjectID == 0 {
@@ -86,6 +96,10 @@ func (f *FilmHandler) DeleteFilm(w http.ResponseWriter, r *http.Request) {
 	writeJSONResponse(w, http.StatusOK, film)
 }
 
+// PatchFilm updates a film fields based on the provided JSON payload.
+// It decoded the fields from the json and call a service to update the fields
+// The service called has the responsability if the subject user id is allowed (or not allowed) for updating the given film
+// Its response is the film updated or any error if encountred
 func (f *FilmHandler) PatchFilm(w http.ResponseWriter, r *http.Request) {
 	subjectID, ok := extractSubjectIdFromContext(r)
 	if !ok || subjectID == 0 {
@@ -109,6 +123,10 @@ func (f *FilmHandler) PatchFilm(w http.ResponseWriter, r *http.Request) {
 	writeJSONResponse(w, http.StatusOK, film)
 }
 
+// PutFilm puts and saves a film details.
+// If there is not all the fields of the film given, then will return a error response
+// The service called has the responsability if the subject user id is allowed (or not allowed) for updating the given film
+// Its response is the film updated or any error if encountred
 func (f *FilmHandler) PutFilm(w http.ResponseWriter, r *http.Request) {
 	subjectID, ok := r.Context().Value("subjectId").(int)
 	if !ok || subjectID == 0 {

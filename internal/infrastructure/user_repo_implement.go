@@ -18,7 +18,7 @@ func NewUserRepo(db *gorm.DB) *UserRepo {
 	return &UserRepo{dbConnection: db}
 }
 
-// Register user
+// CreateUser creates a new given ser in the database connection
 func (pg *UserRepo) CreateUser(user domain.User) error {
 	if err := pg.dbConnection.Create(&user).Error; err != nil {
 		log.Println("User creatation failed")
@@ -41,6 +41,7 @@ func (pg *UserRepo) GetUserByUsernameAndPassword(userName, password string) (dom
 	return user, nil
 }
 
+// GetUserById gets a user for the given id
 func (pg *UserRepo) GetUserById(userID int) (domain.User, error) {
 	var user domain.User
 	if err := pg.dbConnection.First(&user, userID).Error; err != nil {
@@ -50,6 +51,7 @@ func (pg *UserRepo) GetUserById(userID int) (domain.User, error) {
 	return user, nil
 }
 
+// GetAllUsers retrieves a list of all user records in the database
 func (pg *UserRepo) GetAllUsers() ([]domain.User, error) {
 	var users []domain.User
 	if err := pg.dbConnection.Find(&users).Error; err != nil {
@@ -59,7 +61,7 @@ func (pg *UserRepo) GetAllUsers() ([]domain.User, error) {
 	return users, nil
 }
 
-// Delete user
+// DeleteUser removes a user for the given id
 func (pg *UserRepo) DeleteUser(userID int) error {
 	return nil
 }

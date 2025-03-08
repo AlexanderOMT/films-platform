@@ -17,10 +17,12 @@ type UserServiceImpl struct {
 	userRepo domain.UserRepository
 }
 
+// NewUserService creates a new instance of UserService with the provided user repository.
 func NewUserService(userRepo domain.UserRepository) UserService {
 	return &UserServiceImpl{userRepo: userRepo}
 }
 
+// CreateUser saves a new user to the repository and returns the pointer of the created user.
 func (u *UserServiceImpl) CreateUser(user domain.User) (*domain.User, error) {
 	err := u.userRepo.CreateUser(user)
 	if err != nil {
@@ -29,6 +31,7 @@ func (u *UserServiceImpl) CreateUser(user domain.User) (*domain.User, error) {
 	return &user, nil
 }
 
+// GetUserByUsernameAndPassword fetches a user from the user repository by their username and password.
 func (u *UserServiceImpl) GetUserByUsernameAndPassword(userName, password string) (*domain.User, error) {
 	foundUser, err := u.userRepo.GetUserByUsernameAndPassword(userName, password)
 	if err != nil {
@@ -37,6 +40,7 @@ func (u *UserServiceImpl) GetUserByUsernameAndPassword(userName, password string
 	return &foundUser, nil
 }
 
+// GetUserById retrieves a user by their primary key: user ID.
 func (u *UserServiceImpl) GetUserById(userId int) (*domain.User, error) {
 	foundUser, err := u.userRepo.GetUserById(userId)
 	if err != nil {
@@ -45,6 +49,7 @@ func (u *UserServiceImpl) GetUserById(userId int) (*domain.User, error) {
 	return &foundUser, nil
 }
 
+// GetAllUsers returns a list of all users from the repository.
 func (u *UserServiceImpl) GetAllUsers() (*[]domain.User, error) {
 	users, err := u.userRepo.GetAllUsers()
 	if err != nil {

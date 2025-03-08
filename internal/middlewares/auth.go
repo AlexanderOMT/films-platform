@@ -9,6 +9,10 @@ import (
 
 var secretKey = []byte("secret-key")
 
+// AuthenticateTokenUser acts as a middleware that validates the jwt token in the request header.
+// It checks if the token is valid and decodes the claims to extract the user subject ID.
+// If can parse succesfully the token and get the subject ID, then will add the subject id to the request context and continious with the next handler
+// If the token is invalid or malformed, it returns an error response.
 func AuthenticateTokenUser(nextHandlerFunc http.HandlerFunc) http.HandlerFunc {
 	// FIXME: style: status should be related to the actual error
 	return func(w http.ResponseWriter, r *http.Request) {

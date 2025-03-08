@@ -20,6 +20,8 @@ type Variable struct {
 	SSLMode          string
 }
 
+// OpenDatabase set a connection to the PostgreSQL database using credentials from environment variables.
+// It returns a GORM database instance and any error if encountered.
 func OpenDatabase() (*gorm.DB, error) {
 	variables := Variable{
 		Host:             os.Getenv("DB_HOST"),
@@ -49,6 +51,8 @@ func OpenDatabase() (*gorm.DB, error) {
 	return db, nil
 }
 
+// CloseDatabase closes the open connection to the PostgreSQL database and prevents new queries from starting. Close then waits for all queries that have started processing on the server to finish.
+// It returns the database closed, or any error if encountered.
 func CloseDatabase(db *gorm.DB) (*gorm.DB, error) {
 	sqlDB, err := db.DB()
 	if err != nil {
