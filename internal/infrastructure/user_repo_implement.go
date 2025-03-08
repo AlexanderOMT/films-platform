@@ -3,11 +3,10 @@ package infrastructure
 // TODO change name of database package
 
 import (
-	"golang-api-film-management/internal/domain"
-	"log"
-
 	_ "github.com/lib/pq" // SQL driver
 	"gorm.io/gorm"
+
+	"golang-api-film-management/internal/domain"
 )
 
 type UserRepo struct {
@@ -21,7 +20,6 @@ func NewUserRepo(db *gorm.DB) *UserRepo {
 // CreateUser creates a new given ser in the database connection
 func (pg *UserRepo) CreateUser(user domain.User) error {
 	if err := pg.dbConnection.Create(&user).Error; err != nil {
-		log.Println("User creatation failed")
 		return err
 	}
 	return nil
@@ -32,10 +30,8 @@ func (pg *UserRepo) GetUserByUsernameAndPassword(userName, password string) (dom
 	var user domain.User
 	if err := pg.dbConnection.Where("username = ? AND password = ?", userName, password).First(&user).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			log.Println("User not found")
 			return domain.User{}, err
 		}
-		log.Println("GetUserByUsernameAndPassword failed")
 		return domain.User{}, err
 	}
 	return user, nil
@@ -45,7 +41,6 @@ func (pg *UserRepo) GetUserByUsernameAndPassword(userName, password string) (dom
 func (pg *UserRepo) GetUserById(userID int) (domain.User, error) {
 	var user domain.User
 	if err := pg.dbConnection.First(&user, userID).Error; err != nil {
-		log.Println("GetUserById failed")
 		return domain.User{}, err
 	}
 	return user, nil
@@ -55,7 +50,6 @@ func (pg *UserRepo) GetUserById(userID int) (domain.User, error) {
 func (pg *UserRepo) GetAllUsers() ([]domain.User, error) {
 	var users []domain.User
 	if err := pg.dbConnection.Find(&users).Error; err != nil {
-		log.Println("GetAllUsers failed")
 		return nil, err
 	}
 	return users, nil

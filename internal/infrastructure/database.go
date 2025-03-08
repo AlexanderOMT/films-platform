@@ -41,7 +41,7 @@ func OpenDatabase() (*gorm.DB, error) {
 	}
 	sqlDB, err := db.DB()
 	if err != nil {
-		log.Println("Fail to get the database instance...")
+		log.Println("Fail to retrieve the database instance...")
 		return nil, err
 	}
 	if err := sqlDB.Ping(); err != nil {
@@ -56,7 +56,7 @@ func OpenDatabase() (*gorm.DB, error) {
 func CloseDatabase(db *gorm.DB) (*gorm.DB, error) {
 	sqlDB, err := db.DB()
 	if err != nil {
-		log.Println("Fail to get the database instance...")
+		log.Println("Fail to retrieve the database instance...")
 		return nil, err
 	}
 	if err := sqlDB.Close(); err != nil {

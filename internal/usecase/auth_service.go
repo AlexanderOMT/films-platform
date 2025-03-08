@@ -1,8 +1,8 @@
 package usecase
 
 import (
+	"fmt"
 	"golang-api-film-management/internal/domain"
-	"log"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -28,29 +28,28 @@ func NewAuthService(userService UserService) AuthService {
 	return &AuthServiceImpl{userService: userService}
 }
 
-// RegisterUser creates a new user. Only add the user to DB, not generate any tokens
+// RegisterUser creates a new user. Only add the user to DB, not generate any tokens.
 func (a *AuthServiceImpl) RegisterUser(user domain.User) (*domain.User, error) {
 	createdUser, err := a.userService.CreateUser(user)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to register user: %w", err)
 	}
 	return createdUser, nil
 }
 
 // LoginUser authenticates a user by verifying their username and password.
-// If the credentials are correct, it generates a new jwt token for the user.
+// If the credentials are correct, it generates a new JWT token for the user.
 func (a *AuthServiceImpl) LoginUser(user domain.User) (*string, error) {
 	foundUser, err := a.userService.GetUserByUsernameAndPassword(user.Username, user.Password)
 	if err != nil {
-		log.Println("AuthServiceImpl: LoginUser user credentials are incorrect")
-		return nil, err
+		return nil, fmt.Errorf("failed to login user %s: %w", user.Username, err)
 	}
-	log.Println("AuthServiceImpl: LoginUser user credentials are correct")
 
 	createdToken, err := a.generateNewToken(*foundUser)
 	if err != nil {
-		log.Println("AuthServiceImpl: LoginUser error")
+		return nil, fmt.Errorf("failed to generate token for user %s: %w", user.Username, err)
 	}
+
 	return createdToken, nil
 }
 
@@ -62,12 +61,13 @@ func (a *AuthServiceImpl) generateNewToken(user domain.User) (*string, error) {
 		jwt.MapClaims{
 			"Subject":   user.Id,                          // Subject (user). Id is useful to query with the primary key of the database
 			"ExpiresAt": time.Now().Add(time.Hour).Unix(), // expiration (time.Hour is a const of: 1h0m0s)
-			"IssuesAt":  time.Now().Unix(),                // issued at
+			"IssuedAt":  time.Now().Unix(),                // issued at
 		})
 
 	tokenSigned, err := token.SignedString(secretKey)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to sign JWT token for user ID %d: %w", user.Id, err)
 	}
+
 	return &tokenSigned, nil
 }

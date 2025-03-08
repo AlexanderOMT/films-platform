@@ -18,10 +18,10 @@ func AuthenticateTokenUser(nextHandlerFunc http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Parse request body and decode json
 		tokenString := r.Header.Get("Authorization")
-		tokenVerified, err := jwt.Parse(tokenString, func(tokenString *jwt.Token) (interface{}, error) {
+		tokenParsed, err := jwt.Parse(tokenString, func(tokenString *jwt.Token) (interface{}, error) {
 			return secretKey, nil
 		})
-		if !tokenVerified.Valid {
+		if !tokenParsed.Valid {
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
@@ -30,7 +30,7 @@ func AuthenticateTokenUser(nextHandlerFunc http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		claims, ok := tokenVerified.Claims.(jwt.MapClaims)
+		claims, ok := tokenParsed.Claims.(jwt.MapClaims)
 		if !ok {
 			http.Error(w, "Invalid token claims", http.StatusUnauthorized)
 		}

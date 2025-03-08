@@ -1,10 +1,9 @@
 package usecase
 
 import (
+	"fmt"
 	"golang-api-film-management/internal/domain"
 )
-
-// TODO: enhance: add logger to all the package (this is to check each files of this package)
 
 type UserService interface {
 	CreateUser(user domain.User) (*domain.User, error)
@@ -26,7 +25,7 @@ func NewUserService(userRepo domain.UserRepository) UserService {
 func (u *UserServiceImpl) CreateUser(user domain.User) (*domain.User, error) {
 	err := u.userRepo.CreateUser(user)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
 	return &user, nil
 }
@@ -35,7 +34,7 @@ func (u *UserServiceImpl) CreateUser(user domain.User) (*domain.User, error) {
 func (u *UserServiceImpl) GetUserByUsernameAndPassword(userName, password string) (*domain.User, error) {
 	foundUser, err := u.userRepo.GetUserByUsernameAndPassword(userName, password)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get user by username and password: %w", err)
 	}
 	return &foundUser, nil
 }
@@ -44,7 +43,7 @@ func (u *UserServiceImpl) GetUserByUsernameAndPassword(userName, password string
 func (u *UserServiceImpl) GetUserById(userId int) (*domain.User, error) {
 	foundUser, err := u.userRepo.GetUserById(userId)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get user by ID %d: %w", userId, err)
 	}
 	return &foundUser, nil
 }
@@ -53,7 +52,7 @@ func (u *UserServiceImpl) GetUserById(userId int) (*domain.User, error) {
 func (u *UserServiceImpl) GetAllUsers() (*[]domain.User, error) {
 	users, err := u.userRepo.GetAllUsers()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get all users: %w", err)
 	}
 	return &users, nil
 }

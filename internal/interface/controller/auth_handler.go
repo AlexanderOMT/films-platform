@@ -26,13 +26,15 @@ func (authHandler *AuthHandler) RegisterUser(w http.ResponseWriter, r *http.Requ
 	// Parse request body and decode json
 	var userToCreate domain.User
 	if err := json.NewDecoder(r.Body).Decode(&userToCreate); err != nil {
+		log.Printf("User creation error during mapping the body request to user model: %v", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	// TODO: enhance: Hash for the user password before storing
 	createdUser, err := authHandler.authService.RegisterUser(userToCreate)
 	if err != nil {
-		log.Println("handler: createUser error")
+		log.Printf("User creation failed during registration: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
 	// FIXME: style: This block of code could be repeated from time to time, consider refactoring or creating a util function
@@ -41,7 +43,7 @@ func (authHandler *AuthHandler) RegisterUser(w http.ResponseWriter, r *http.Requ
 	// Encode users to json and write to response
 	json.NewEncoder(w).Encode(userToCreate)
 
-	log.Printf("Created User: %v", createdUser.Username)
+	log.Printf("User created successfully | Username: %v", createdUser.Username)
 }
 
 // LoginUser generate a new jwt token for the user.
@@ -53,6 +55,7 @@ func (authHandler *AuthHandler) LoginUser(w http.ResponseWriter, r *http.Request
 	// Parse request body and decode json
 	var userToLogin domain.User
 	if err := json.NewDecoder(r.Body).Decode(&userToLogin); err != nil {
+		log.Printf("User logging error during mapping the body request to user model: %v", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -60,6 +63,7 @@ func (authHandler *AuthHandler) LoginUser(w http.ResponseWriter, r *http.Request
 	tokenStringUser, err := authHandler.authService.LoginUser(userToLogin)
 	if err != nil {
 		// status should be related to incorrect credentials
+		log.Printf("User logging error during credentials verification: %v", err)
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
@@ -69,7 +73,7 @@ func (authHandler *AuthHandler) LoginUser(w http.ResponseWriter, r *http.Request
 	// Encode users to json and write to response
 	json.NewEncoder(w).Encode(tokenStringUser)
 
-	log.Printf("Logged User token: %v", tokenStringUser)
+	log.Printf("User logged successfully | Username: %v", userToLogin.Username)
 }
 
 func (authService *AuthHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
