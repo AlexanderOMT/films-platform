@@ -18,3 +18,5 @@ HOST=0.0.0.0
 
 ## Folder structure
 (...)
+
+consider: Should we keep the connection up all the time? Or just we want to query to DB ?

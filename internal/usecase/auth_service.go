@@ -9,7 +9,7 @@ import (
 )
 
 type AuthService interface {
-	RegisterUser(user domain.User) (*domain.User, error)
+	RegisterUser(user *domain.User) (*domain.User, error)
 	LoginUser(user domain.User) (*string, error)
 
 	generateNewToken(user domain.User) (*string, error)
@@ -29,7 +29,7 @@ func NewAuthService(userService UserService) AuthService {
 }
 
 // RegisterUser creates a new user. Only add the user to DB, not generate any tokens.
-func (a *AuthServiceImpl) RegisterUser(user domain.User) (*domain.User, error) {
+func (a *AuthServiceImpl) RegisterUser(user *domain.User) (*domain.User, error) {
 	createdUser, err := a.userService.CreateUser(user)
 	if err != nil {
 		return nil, fmt.Errorf("failed to register user: %w", err)

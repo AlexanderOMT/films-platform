@@ -6,7 +6,7 @@ import (
 )
 
 type UserService interface {
-	CreateUser(user domain.User) (*domain.User, error)
+	CreateUser(user *domain.User) (*domain.User, error)
 	GetUserByUsernameAndPassword(userName, password string) (*domain.User, error)
 	GetUserById(userId int) (*domain.User, error)
 	GetAllUsers() (*[]domain.User, error)
@@ -22,12 +22,12 @@ func NewUserService(userRepo domain.UserRepository) UserService {
 }
 
 // CreateUser saves a new user to the repository and returns the pointer of the created user.
-func (u *UserServiceImpl) CreateUser(user domain.User) (*domain.User, error) {
+func (u *UserServiceImpl) CreateUser(user *domain.User) (*domain.User, error) {
 	err := u.userRepo.CreateUser(user)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
-	return &user, nil
+	return user, nil
 }
 
 // GetUserByUsernameAndPassword fetches a user from the user repository by their username and password.

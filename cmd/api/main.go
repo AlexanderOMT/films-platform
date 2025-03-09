@@ -13,7 +13,6 @@ import (
 
 func main() {
 	// Connect to database
-	// TODO: consider: Should we keep the connection up all the time? Or just we want to query to DB ?
 	dbConnection, err := infrastructure.OpenDatabase()
 	if err != nil {
 		log.Fatalf("Fail to connect to database: %v", err)
@@ -40,5 +39,4 @@ func main() {
 	httpServer.Start()
 
 	<-quitChan
-	// os.Exit(0) This avoid the Database to be closed. If we open and close the database when is only querying to Postgres, then we could keep this
 }

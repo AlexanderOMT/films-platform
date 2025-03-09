@@ -18,8 +18,8 @@ func NewUserRepo(db *gorm.DB) *UserRepo {
 }
 
 // CreateUser creates a new given ser in the database connection
-func (pg *UserRepo) CreateUser(user domain.User) error {
-	if err := pg.dbConnection.Create(&user).Error; err != nil {
+func (pg *UserRepo) CreateUser(user *domain.User) error {
+	if err := pg.dbConnection.Create(user).Error; err != nil {
 		return err
 	}
 	return nil
@@ -53,9 +53,4 @@ func (pg *UserRepo) GetAllUsers() ([]domain.User, error) {
 		return nil, err
 	}
 	return users, nil
-}
-
-// DeleteUser removes a user for the given id
-func (pg *UserRepo) DeleteUser(userID int) error {
-	return nil
 }

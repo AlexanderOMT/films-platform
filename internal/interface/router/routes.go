@@ -23,18 +23,16 @@ func RegisterRoutes(userService usecase.UserService, authService usecase.AuthSer
 		case http.MethodPost:
 			authHandler.RegisterUser(w, r) // Missing username constraint and password validations
 		case http.MethodGet:
-			authHandler.LoginUser(w, r) // Done
-		case http.MethodDelete:
-			middlewares.AuthenticateTokenUser(authHandler.DeleteUser)(w, r) // No implemented, but no mandatory up to now
+			authHandler.LoginUser(w, r)
 		default:
 			http.Error(w, "Method for this route is not allowed", http.StatusMethodNotAllowed)
 		}
 	})
 
 	// Related to films endpoints, each route is a protected one
-	http.HandleFunc("POST /film", middlewares.AuthenticateTokenUser(filmHandler.CreateFilm))   // Done
-	http.HandleFunc("GET /films", middlewares.AuthenticateTokenUser(filmHandler.GetAllFilms))  // Done
-	http.HandleFunc("PATCH /film", middlewares.AuthenticateTokenUser(filmHandler.PatchFilm))   // Done
-	http.HandleFunc("PUT /film", middlewares.AuthenticateTokenUser(filmHandler.PutFilm))       // Done
-	http.HandleFunc("DELETE /film", middlewares.AuthenticateTokenUser(filmHandler.DeleteFilm)) // Done
+	http.HandleFunc("POST /film", middlewares.AuthenticateTokenUser(filmHandler.CreateFilm))
+	http.HandleFunc("GET /films", middlewares.AuthenticateTokenUser(filmHandler.GetAllFilms))
+	http.HandleFunc("PATCH /film", middlewares.AuthenticateTokenUser(filmHandler.PatchFilm))
+	http.HandleFunc("PUT /film", middlewares.AuthenticateTokenUser(filmHandler.PutFilm))
+	http.HandleFunc("DELETE /film", middlewares.AuthenticateTokenUser(filmHandler.DeleteFilm))
 }

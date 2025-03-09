@@ -21,12 +21,6 @@ func NewFilmHandler(filmService usecase.FilmService) *FilmHandler {
 	return &FilmHandler{filmService: filmService}
 }
 
-// These are protected routes. Should be assume that there is always a token in it header?
-
-// #TODO: enhance: implements better logger
-
-// #TODO: fix: http.Error should return a proper status depending on the situation. Check in all the API
-
 // #TODO: enhance: implements input validations
 
 // CreateFilm creates a new film in the system and make the relationship with their creator
@@ -52,7 +46,7 @@ func (f *FilmHandler) CreateFilm(w http.ResponseWriter, r *http.Request) {
 	err := f.filmService.CreateFilm(&filmToCreate)
 	if err != nil {
 		log.Printf("Error creating film: %v", err)
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		http.Error(w, "Unauthorized", http.StatusInternalServerError)
 		return
 	}
 
