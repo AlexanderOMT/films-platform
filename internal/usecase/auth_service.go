@@ -5,6 +5,8 @@ import (
 	"encoding/hex"
 	"fmt"
 	"golang-api-film-management/internal/domain"
+	"log"
+	"regexp"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -13,6 +15,7 @@ import (
 type AuthService interface {
 	RegisterUser(user *domain.User) (*domain.User, error)
 	LoginUser(user domain.User) (*string, error)
+	ValidateUserFields(user *domain.User) (bool, error)
 
 	generateNewToken(user domain.User) (*string, error)
 }
@@ -95,4 +98,43 @@ func (a *AuthServiceImpl) generateHash(text string) (string, error) {
 		return "", fmt.Errorf("error generating hash for the given input text")
 	}
 	return hex.EncodeToString(algorithm.Sum(nil)), nil
+}
+
+// ValidateUserFields validates the field of a user so ensure that fit the requirements
+func (a *AuthServiceImpl) ValidateUserFields(user *domain.User) (bool, error) {
+	_, err := isAlphanumic(user.Username)
+	if err != nil {
+		log.Printf("Username does not meet the required constraints")
+		return false, err
+	}
+
+	_, err = isValidPassword(user.Password)
+	if err != nil {
+		log.Printf("Error loging a user. Password does not meet the required constraints")
+		return false, err
+	}
+	return true, nil
+}
+
+func isAlphanumic(text string) (bool, error) {
+	isAlphanumInput := regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9]*$`).MatchString(text)
+	if !isAlphanumInput {
+		return false, fmt.Errorf("input text should start with letter and only alphanumeric characters are accepted (no special characters)")
+	}
+	return true, nil
+}
+
+func isValidPassword(password string) (bool, error) {
+	if len(password) < 6 || len(password) > 20 {
+		return false, fmt.Errorf("input must be between 6 and 20 characters")
+	}
+
+	uppercase := regexp.MustCompile(`[A-Z]`)
+	lowercase := regexp.MustCompile(`[a-z]`)
+	number := regexp.MustCompile(`[0-9]`)
+	if !uppercase.MatchString(password) || !lowercase.MatchString(password) || !number.MatchString(password) {
+		return false, fmt.Errorf("input must contain at least one uppercase letter, one lowercase letter, one number")
+	}
+
+	return true, nil
 }

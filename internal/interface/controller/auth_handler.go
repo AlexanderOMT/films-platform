@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -23,9 +24,6 @@ func NewAuthHandler(authService usecase.AuthService) *AuthHandler {
 // It decodes the user's name and password from the request body, and then calls the service to register the user.
 // Its response is the user fields created or any error if encountred
 func (authHandler *AuthHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
-	// TODO: enhance: 1) regex for alphanumeric starting with letter 2) validations (e.g: max length, and so on)
-
-	// Parse request body and decode json
 	var userToCreate domain.User
 	if err := json.NewDecoder(r.Body).Decode(&userToCreate); err != nil {
 		log.Printf("User creation error during mapping the body request to user model: %v", err)
@@ -37,6 +35,12 @@ func (authHandler *AuthHandler) RegisterUser(w http.ResponseWriter, r *http.Requ
 	if err := validate.Struct(userToCreate); err != nil {
 		log.Printf("Missing required fields for user registration: %v", err)
 		http.Error(w, "Missing required fields", http.StatusBadRequest)
+		return
+	}
+
+	_, err := authHandler.authService.ValidateUserFields(&userToCreate)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Username does not meet the required constraints: %v", err.Error()), http.StatusBadRequest) // TODO status code
 		return
 	}
 
@@ -55,8 +59,6 @@ func (authHandler *AuthHandler) RegisterUser(w http.ResponseWriter, r *http.Requ
 // If this service validate the credentials successfully, then generates a new jwt token
 // Its response is the new jwt token created or any error if encountred
 func (a *AuthHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
-	// TODO: rusername should be on URL?? -> no
-	// Parse request body and decode json
 	var userToLogin domain.User
 	if err := json.NewDecoder(r.Body).Decode(&userToLogin); err != nil {
 		log.Printf("User logging error during mapping the body request to user model: %v", err)
@@ -73,7 +75,6 @@ func (a *AuthHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 
 	tokenStringUser, err := a.authService.LoginUser(userToLogin)
 	if err != nil {
-		// status should be related to incorrect credentials
 		log.Printf("User logging error during credentials verification: %v", err)
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return

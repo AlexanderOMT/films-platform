@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 
@@ -25,10 +24,7 @@ func (userHandler *UserHandler) GetUsers(w http.ResponseWriter, r *http.Request)
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
-	log.Printf("Successfully retrieved all the user list | Users: %v", users)
 
-	// Set response header to json type
-	w.Header().Set("Content-Type", "application/json")
-	// Encode users to json and write to response
-	json.NewEncoder(w).Encode(users)
+	writeJSONResponse(w, http.StatusOK, users)
+	log.Printf("Successfully retrieved all the user list | Users: %v", users)
 }
