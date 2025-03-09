@@ -10,8 +10,6 @@ import (
 
 func RegisterRoutes(userService usecase.UserService, authService usecase.AuthService, filmService usecase.FilmService) {
 
-	// TODO: enhance: sanitize the input (to mitigate vulnerabilities e.g: sql injection)
-
 	userHandler := controller.NewUserHandler(userService)
 	authHandler := controller.NewAuthHandler(authService)
 	filmHandler := controller.NewFilmHandler(filmService)

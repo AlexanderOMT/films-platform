@@ -20,3 +20,6 @@ HOST=0.0.0.0
 (...)
 
 consider: Should we keep the connection up all the time? Or just we want to query to DB ?
+
+Sanitize the input and the field validation:
+https://gorm.io/docs/security.html
