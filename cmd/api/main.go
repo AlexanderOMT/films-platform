@@ -34,9 +34,7 @@ func main() {
 	filmService := usecase.NewFilmService(filmRepo)
 
 	// Create a HTTP server with the services
-	// TODO: addressToListen should be read from env or docker port
-	addressToListen := "0.0.0.0:8000"
-	httpServer := router.NewServerAtAddr(addressToListen, userService, authService, filmService)
+	httpServer := router.NewServer(userService, authService, filmService)
 
 	// Channel for stop signal
 	httpServer.Start()

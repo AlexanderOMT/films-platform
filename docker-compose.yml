@@ -29,7 +29,7 @@ services:
       dockerfile: Dockerfile
     restart: on-failure
     ports:
-      - "8000:8000"
+      - "${EXPOSE_PORT}:${EXPOSE_PORT}"
     depends_on:
       - "postgres-database"
     networks:

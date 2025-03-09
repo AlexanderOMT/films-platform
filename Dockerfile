@@ -20,6 +20,4 @@ RUN go build -o ./out/films-api ./cmd/api/main.go
 # TODO: consider if this is a good idea: see https://www.docker.com/blog/developing-go-apps-docker/
 
 # Run golang API binary
-EXPOSE 8000
-
 CMD ["./out/films-api"]
