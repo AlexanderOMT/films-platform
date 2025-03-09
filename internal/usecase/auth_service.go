@@ -1,6 +1,8 @@
 package usecase
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"golang-api-film-management/internal/domain"
 	"time"
@@ -30,17 +32,29 @@ func NewAuthService(userService UserService) AuthService {
 
 // RegisterUser creates a new user. Only add the user to DB, not generate any tokens.
 func (a *AuthServiceImpl) RegisterUser(user *domain.User) (*domain.User, error) {
+	hashedPassword, err := a.generateHash(user.Password)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate a hash password during user registration : %w", err)
+	}
+
+	user.Password = hashedPassword
 	createdUser, err := a.userService.CreateUser(user)
 	if err != nil {
-		return nil, fmt.Errorf("failed to register user: %w", err)
+		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
+
 	return createdUser, nil
 }
 
 // LoginUser authenticates a user by verifying their username and password.
 // If the credentials are correct, it generates a new JWT token for the user.
 func (a *AuthServiceImpl) LoginUser(user domain.User) (*string, error) {
-	foundUser, err := a.userService.GetUserByUsernameAndPassword(user.Username, user.Password)
+	hashedPassword, err := a.generateHash(user.Password)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate a hash password during user login validation : %w", err)
+	}
+
+	foundUser, err := a.userService.GetUserByUsernameAndPassword(user.Username, hashedPassword)
 	if err != nil {
 		return nil, fmt.Errorf("failed to login user %s: %w", user.Username, err)
 	}
@@ -70,4 +84,15 @@ func (a *AuthServiceImpl) generateNewToken(user domain.User) (*string, error) {
 	}
 
 	return &tokenSigned, nil
+}
+
+// generateHash generates the hash using `sha256` without salt for the given text.
+// It returns the hashed text or error if any error encountred
+func (a *AuthServiceImpl) generateHash(text string) (string, error) {
+	algorithm := sha256.New()
+	_, err := algorithm.Write([]byte(text))
+	if err != nil {
+		return "", fmt.Errorf("error generating hash for the given input text")
+	}
+	return hex.EncodeToString(algorithm.Sum(nil)), nil
 }

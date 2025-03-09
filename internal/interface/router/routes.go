@@ -18,16 +18,8 @@ func RegisterRoutes(userService usecase.UserService, authService usecase.AuthSer
 
 	// Related to user endpoints, some of them are unprotected routes (this is that does not require jwt)
 	http.HandleFunc("GET /users", userHandler.GetUsers)
-	http.HandleFunc("/user", func(w http.ResponseWriter, r *http.Request) {
-		switch r.Method {
-		case http.MethodPost:
-			authHandler.RegisterUser(w, r) // Missing username constraint and password validations
-		case http.MethodGet:
-			authHandler.LoginUser(w, r)
-		default:
-			http.Error(w, "Method for this route is not allowed", http.StatusMethodNotAllowed)
-		}
-	})
+	http.HandleFunc("POST /register", authHandler.RegisterUser) // Missing username constraint and password validations
+	http.HandleFunc("POST /login", authHandler.LoginUser)
 
 	// Related to films endpoints, each route is a protected one
 	http.HandleFunc("POST /film", middlewares.AuthenticateTokenUser(filmHandler.CreateFilm))

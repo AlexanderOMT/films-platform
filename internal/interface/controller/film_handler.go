@@ -111,7 +111,6 @@ func (f *FilmHandler) PatchFilm(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
-	title := r.URL.Query().Get("title")
 
 	var filmToUpdateFields map[string]interface{}
 	if err := deserializeJSONFromRequest(r, &filmToUpdateFields); err != nil {
@@ -120,6 +119,7 @@ func (f *FilmHandler) PatchFilm(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	title := r.URL.Query().Get("title")
 	film, err := f.filmService.PatchFilm(title, &filmToUpdateFields, subjectID)
 	if err != nil {
 		log.Printf("Error updating (PATCH) film with title %s: %v", title, err)
@@ -185,8 +185,15 @@ func deserializeJSONFromRequest(r *http.Request, data interface{}) error {
 	return nil
 }
 
-// TODO: style :refactor this. This seems not to be a not good practice as is not flexible
+// extractSubjectIdFromContext extracts the subject id from the request context
+// It assumes that is always with the key `subjectId` as `int`
+// TODO: style: refactor this: seems not to be a not good practice as is not flexible
+// TODO: style: locate this in middleware
 func extractSubjectIdFromContext(r *http.Request) (int, bool) {
 	subjectID, ok := r.Context().Value("subjectId").(int)
+	if !ok {
+		log.Println("error extracting subjectId from context: not found or not an int")
+		return 0, false
+	}
 	return subjectID, ok
 }

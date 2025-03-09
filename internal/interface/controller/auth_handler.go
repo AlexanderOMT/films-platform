@@ -7,6 +7,8 @@ import (
 
 	"golang-api-film-management/internal/domain"
 	"golang-api-film-management/internal/usecase"
+
+	"github.com/go-playground/validator/v10"
 )
 
 type AuthHandler struct {
@@ -30,7 +32,14 @@ func (authHandler *AuthHandler) RegisterUser(w http.ResponseWriter, r *http.Requ
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	// TODO: enhance: Hash for the user password before storing
+
+	var validate = validator.New()
+	if err := validate.Struct(userToCreate); err != nil {
+		log.Printf("Missing required fields for user registration: %v", err)
+		http.Error(w, "Missing required fields", http.StatusBadRequest)
+		return
+	}
+
 	createdUser, err := authHandler.authService.RegisterUser(&userToCreate)
 	if err != nil {
 		log.Printf("User creation failed during registration: %v", err)
@@ -46,12 +55,19 @@ func (authHandler *AuthHandler) RegisterUser(w http.ResponseWriter, r *http.Requ
 // If this service validate the credentials successfully, then generates a new jwt token
 // Its response is the new jwt token created or any error if encountred
 func (a *AuthHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
-	// TODO: rusername should be on URL??
+	// TODO: rusername should be on URL?? -> no
 	// Parse request body and decode json
 	var userToLogin domain.User
 	if err := json.NewDecoder(r.Body).Decode(&userToLogin); err != nil {
 		log.Printf("User logging error during mapping the body request to user model: %v", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	var validate = validator.New()
+	if err := validate.Struct(userToLogin); err != nil {
+		log.Printf("Missing required fields for user login: %v", err)
+		http.Error(w, "Missing required fields", http.StatusBadRequest)
 		return
 	}
 
