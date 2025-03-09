@@ -19,6 +19,7 @@ services:
       - "5432:5432"
     volumes:
       - psql-films-volume:/var/lib/postgresql/data
+      - ./db/schema.sql:/tmp/schema.sql
     networks:
       - films-platform-network
 

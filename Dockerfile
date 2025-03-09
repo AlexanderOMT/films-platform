@@ -9,6 +9,9 @@ WORKDIR /app
 # Copy the project to working dictory
 COPY . /app
 
+# Need for initialization of database
+RUN apt-get update && apt-get install -y jq postgresql-client && rm -rf /var/lib/apt/lists/*
+
 # Download and clean depedencies
 RUN go mod tidy
 # Build the go binary

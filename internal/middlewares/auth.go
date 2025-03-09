@@ -17,6 +17,11 @@ var secretKey = []byte("secret-key")
 func AuthenticateTokenUser(nextHandlerFunc http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tokenString := r.Header.Get("Authorization")
+		if tokenString == "" {
+			http.Error(w, "Missing authorization token in the header", http.StatusBadRequest)
+			return
+		}
+
 		tokenParsed, err := jwt.Parse(tokenString, func(tokenString *jwt.Token) (interface{}, error) {
 			return secretKey, nil
 		})

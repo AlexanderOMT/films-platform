@@ -42,7 +42,7 @@ func (f *FilmHandler) CreateFilm(w http.ResponseWriter, r *http.Request) {
 	err := f.filmService.CreateFilm(&filmToCreate)
 	if err != nil {
 		log.Printf("Error creating film: %v", err)
-		http.Error(w, "Unauthorized", http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 

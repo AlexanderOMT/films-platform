@@ -102,7 +102,7 @@ func (a *AuthServiceImpl) generateHash(text string) (string, error) {
 
 // ValidateUserFields validates the field of a user so ensure that fit the requirements
 func (a *AuthServiceImpl) ValidateUserFields(user *domain.User) (bool, error) {
-	_, err := isAlphanumic(user.Username)
+	_, err := validateAlphanumeric(user.Username)
 	if err != nil {
 		log.Printf("Username does not meet the required constraints")
 		return false, err
@@ -116,7 +116,7 @@ func (a *AuthServiceImpl) ValidateUserFields(user *domain.User) (bool, error) {
 	return true, nil
 }
 
-func isAlphanumic(text string) (bool, error) {
+func validateAlphanumeric(text string) (bool, error) {
 	isAlphanumInput := regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9]*$`).MatchString(text)
 	if !isAlphanumInput {
 		return false, fmt.Errorf("input text should start with letter and only alphanumeric characters are accepted (no special characters)")
