@@ -15,9 +15,7 @@ var secretKey = []byte("secret-key")
 // If can parse succesfully the token and get the subject ID, then will add the subject id to the request context and continious with the next handler
 // If the token is invalid or malformed, it returns an error response.
 func AuthenticateTokenUser(nextHandlerFunc http.HandlerFunc) http.HandlerFunc {
-	// FIXME: style: status should be related to the actual error
 	return func(w http.ResponseWriter, r *http.Request) {
-		// Parse request body and decode json
 		tokenString := r.Header.Get("Authorization")
 		tokenParsed, err := jwt.Parse(tokenString, func(tokenString *jwt.Token) (interface{}, error) {
 			return secretKey, nil
@@ -39,7 +37,6 @@ func AuthenticateTokenUser(nextHandlerFunc http.HandlerFunc) http.HandlerFunc {
 		}
 		subjectId := int(claims["Subject"].(float64))
 
-		// Create a context with the  user id for the handlers can make queries easier without parsing the token each time to DB
 		ctx := context.WithValue(r.Context(), "subjectId", subjectId)
 		nextHandlerFunc.ServeHTTP(w, r.WithContext(ctx))
 	}

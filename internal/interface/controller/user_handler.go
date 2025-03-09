@@ -25,6 +25,6 @@ func (userHandler *UserHandler) GetUsers(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	writeJSONResponse(w, http.StatusOK, users)
+	WriteJSONResponse(w, http.StatusOK, users)
 	log.Printf("Successfully retrieved all the user list | Users: %v", users)
 }

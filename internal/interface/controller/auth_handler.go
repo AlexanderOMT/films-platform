@@ -40,7 +40,7 @@ func (authHandler *AuthHandler) RegisterUser(w http.ResponseWriter, r *http.Requ
 
 	_, err := authHandler.authService.ValidateUserFields(&userToCreate)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Username does not meet the required constraints: %v", err.Error()), http.StatusBadRequest) // TODO status code
+		http.Error(w, fmt.Sprintf("Username does not meet the required constraints: %v", err.Error()), http.StatusBadRequest)
 		return
 	}
 
@@ -50,7 +50,7 @@ func (authHandler *AuthHandler) RegisterUser(w http.ResponseWriter, r *http.Requ
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
-	writeJSONResponse(w, http.StatusOK, createdUser)
+	WriteJSONResponse(w, http.StatusOK, createdUser)
 	log.Printf("User created successfully | Username: %v", createdUser.Username)
 }
 
@@ -80,6 +80,6 @@ func (a *AuthHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writeJSONResponse(w, http.StatusOK, tokenStringUser)
+	WriteJSONResponse(w, http.StatusOK, tokenStringUser)
 	log.Printf("User logged successfully | Username: %v", userToLogin.Username)
 }

@@ -1,7 +1,5 @@
 package infrastructure
 
-// TODO change name of database package
-
 import (
 	_ "github.com/lib/pq" // SQL driver
 	"gorm.io/gorm"
@@ -25,7 +23,8 @@ func (pg *UserRepo) CreateUser(user *domain.User) error {
 	return nil
 }
 
-// TODO: consider refactor: GetUserByUsername and GetUserById could be in one method: GetUserByKey(...)
+// GetUserByUsernameAndPassword retrieves a user if the username and the password matches.
+// If does not match the username and password, then returns an error and empty user model
 func (pg *UserRepo) GetUserByUsernameAndPassword(userName, password string) (domain.User, error) {
 	var user domain.User
 	if err := pg.dbConnection.Where("username = ? AND password = ?", userName, password).First(&user).Error; err != nil {

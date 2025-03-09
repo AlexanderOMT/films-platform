@@ -1,8 +1,6 @@
 package controller
 
 import (
-	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -21,13 +19,11 @@ func NewFilmHandler(filmService usecase.FilmService) *FilmHandler {
 	return &FilmHandler{filmService: filmService}
 }
 
-// #TODO: enhance: implements input validations
-
 // CreateFilm creates a new film in the system and make the relationship with their creator
 // The relationship of the film with their creator is the subjecy user id extracted from the request context
 // Its response is the film created or any error if encountred
 func (f *FilmHandler) CreateFilm(w http.ResponseWriter, r *http.Request) {
-	subjectID, ok := extractSubjectIdFromContext(r)
+	subjectID, ok := ExtractSubjectIdFromContext(r)
 	if !ok || subjectID == 0 {
 		log.Println("Error creating film: No subject ID found in context")
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
@@ -35,7 +31,7 @@ func (f *FilmHandler) CreateFilm(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var filmToCreate domain.Film
-	if err := deserializeJSONFromRequest(r, &filmToCreate); err != nil {
+	if err := DeserializeJSONFromRequest(r, &filmToCreate); err != nil {
 		log.Printf("Error deserializing JSON for creating film: %v", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -51,7 +47,7 @@ func (f *FilmHandler) CreateFilm(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Printf("Successfully created film | Film: %v", filmToCreate)
-	writeJSONResponse(w, http.StatusOK, filmToCreate)
+	WriteJSONResponse(w, http.StatusOK, filmToCreate)
 }
 
 // GetAllFilms retrieves all films based on a custom filter from query parameters.
@@ -74,14 +70,14 @@ func (f *FilmHandler) GetAllFilms(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Printf("Successfully retrieved all the films list | Films: %v", films)
-	writeJSONResponse(w, http.StatusOK, films)
+	WriteJSONResponse(w, http.StatusOK, films)
 }
 
 // DeleteFilm deletes a film based on the provided title.
 // Calls a service so delegates the responsability if the subject user id is allowed (or not allowed) for deleting the given film
 // Its response is the film removed or any error if encountred
 func (f *FilmHandler) DeleteFilm(w http.ResponseWriter, r *http.Request) {
-	subjectID, ok := extractSubjectIdFromContext(r)
+	subjectID, ok := ExtractSubjectIdFromContext(r)
 	if !ok || subjectID == 0 {
 		log.Printf("Error deleting film: No subject ID found in context")
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
@@ -97,7 +93,7 @@ func (f *FilmHandler) DeleteFilm(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Printf("Successfully deleted film | Film title: %v", title)
-	writeJSONResponse(w, http.StatusOK, film)
+	WriteJSONResponse(w, http.StatusOK, film)
 }
 
 // PatchFilm updates a film fields based on the provided JSON payload.
@@ -105,7 +101,7 @@ func (f *FilmHandler) DeleteFilm(w http.ResponseWriter, r *http.Request) {
 // The service called has the responsability if the subject user id is allowed (or not allowed) for updating the given film
 // Its response is the film updated or any error if encountred
 func (f *FilmHandler) PatchFilm(w http.ResponseWriter, r *http.Request) {
-	subjectID, ok := extractSubjectIdFromContext(r)
+	subjectID, ok := ExtractSubjectIdFromContext(r)
 	if !ok || subjectID == 0 {
 		log.Println("Error updating (PATCH) the film: No subject ID found in context")
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
@@ -113,7 +109,7 @@ func (f *FilmHandler) PatchFilm(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var filmToUpdateFields map[string]interface{}
-	if err := deserializeJSONFromRequest(r, &filmToUpdateFields); err != nil {
+	if err := DeserializeJSONFromRequest(r, &filmToUpdateFields); err != nil {
 		log.Printf("Error deserializing JSON for updating (PATCH) film: %v", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -128,7 +124,7 @@ func (f *FilmHandler) PatchFilm(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Printf("Successfully updated (PATCH) film with title: %s . This are the fields provided: %v", title, filmToUpdateFields)
-	writeJSONResponse(w, http.StatusOK, film)
+	WriteJSONResponse(w, http.StatusOK, film)
 }
 
 // PutFilm puts and saves a film details.
@@ -145,7 +141,7 @@ func (f *FilmHandler) PutFilm(w http.ResponseWriter, r *http.Request) {
 	title := r.URL.Query().Get("title")
 
 	var filmToSave domain.Film
-	if err := deserializeJSONFromRequest(r, &filmToSave); err != nil {
+	if err := DeserializeJSONFromRequest(r, &filmToSave); err != nil {
 		log.Printf("Error deserializing JSON for saving (PUT) film: %v", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -165,35 +161,5 @@ func (f *FilmHandler) PutFilm(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Printf("Successfully saved (PUT) film | Film title: %s", title)
-	writeJSONResponse(w, http.StatusOK, film)
-}
-
-// #TODO: style: These methods should be reachable from others handlers. Should reconsider the location and implementations of thsis
-// Another idea is to encapsulate this logic into a web struct
-func writeJSONResponse(w http.ResponseWriter, statusCode int, data interface{}) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(statusCode)
-	if err := json.NewEncoder(w).Encode(data); err != nil {
-		http.Error(w, "Error encoding JSON response", http.StatusInternalServerError)
-	}
-}
-
-func deserializeJSONFromRequest(r *http.Request, data interface{}) error {
-	if err := json.NewDecoder(r.Body).Decode(data); err != nil {
-		return fmt.Errorf("error deserializing the object from json: %v", err)
-	}
-	return nil
-}
-
-// extractSubjectIdFromContext extracts the subject id from the request context
-// It assumes that is always with the key `subjectId` as `int`
-// TODO: style: refactor this: seems not to be a not good practice as is not flexible
-// TODO: style: locate this in middleware
-func extractSubjectIdFromContext(r *http.Request) (int, bool) {
-	subjectID, ok := r.Context().Value("subjectId").(int)
-	if !ok {
-		log.Println("error extracting subjectId from context: not found or not an int")
-		return 0, false
-	}
-	return subjectID, ok
+	WriteJSONResponse(w, http.StatusOK, film)
 }
