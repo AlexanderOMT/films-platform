@@ -8,8 +8,10 @@ As the repository as this file "README.md" file is still in progress
 POSTGRES_USER=""
 POSTGRES_PASSWORD=""
 POSTGRES_DB=""
+
 EXPOSE_PORT=8000 
 HOST=0.0.0.0
+SECRET_KEY=""
 
 ## Architecture
 (...)
@@ -24,5 +26,8 @@ Sanitize the input and the field validation:
 https://gorm.io/docs/security.html
 
 sudo docker exec -it films-database psql -U user -d films_platform -f ./tmp/schema.sql
+
+sudo docker exec -it films-database psql -U user -d films_platform -c "DROP TABLE films;"
+sudo docker exec -it films-database psql -U user -d films_platform -c "DROP TABLE users;"
 
 sudo docker exec -it films-service sh -c "sh ./db/init.sh"

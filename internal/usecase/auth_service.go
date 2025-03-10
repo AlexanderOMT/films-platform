@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"golang-api-film-management/internal/domain"
 	"log"
+	"os"
 	"regexp"
 	"time"
 
@@ -23,9 +24,6 @@ type AuthService interface {
 type AuthServiceImpl struct {
 	userService UserService
 }
-
-// FIXME: enhance in future: should be or auto-generated or given by env var
-var secretKey = []byte("secret-key")
 
 // NewAuthService creates a new instance of AuthService with the provided UserService.
 // It returns an implementation of the AuthService interface.
@@ -81,7 +79,12 @@ func (a *AuthServiceImpl) generateNewToken(user domain.User) (*string, error) {
 			"IssuedAt":  time.Now().Unix(),                // issued at
 		})
 
-	tokenSigned, err := token.SignedString(secretKey)
+	secretKey := os.Getenv("SECRET_KEY")
+	if secretKey == "" {
+		return nil, fmt.Errorf("missing secret key environment variable")
+	}
+
+	tokenSigned, err := token.SignedString([]byte(secretKey))
 	if err != nil {
 		return nil, fmt.Errorf("failed to sign JWT token for user ID %d: %w", user.Id, err)
 	}

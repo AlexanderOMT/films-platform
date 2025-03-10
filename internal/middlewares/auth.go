@@ -4,11 +4,10 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/golang-jwt/jwt/v5"
 )
-
-var secretKey = []byte("secret-key")
 
 // AuthenticateTokenUser acts as a middleware that validates the jwt token in the request header.
 // It checks if the token is valid and decodes the claims to extract the user subject ID.
@@ -22,8 +21,14 @@ func AuthenticateTokenUser(nextHandlerFunc http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
+		secretKey := os.Getenv("SECRET_KEY")
+		if secretKey == "" {
+			http.Error(w, "Missing secret key environment variable", http.StatusInternalServerError)
+			return
+		}
+
 		tokenParsed, err := jwt.Parse(tokenString, func(tokenString *jwt.Token) (interface{}, error) {
-			return secretKey, nil
+			return []byte(secretKey), nil
 		})
 		if !tokenParsed.Valid {
 			log.Println("Error validating the jwt in the middleware: Token is invalid")
